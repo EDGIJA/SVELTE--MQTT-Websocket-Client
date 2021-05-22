@@ -11,7 +11,6 @@
 </div>
 	<div>
 		<p>Topic: {$interaction.topic}</p>
-
 	</div>
 <div>
 	<div>
@@ -20,4 +19,3 @@
 </div>
 
 <button type='button' on:click={() => sendMsg(topicX,msgX)}>SEND MESSAGE</button>
-
