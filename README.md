@@ -1,3 +1,8 @@
+This app makes use of "Eclipse Paho JavaScript Client" library. The connection is done through Websocket without SSL and through port 8083. If you want an SSL connection or through another port, you must do it in the mqtt.js file or improve the code.
+
+---
+
+
 *Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
 
 ---
