@@ -1,56 +1,72 @@
-import {writable} from 'svelte/store';
 
-export const  interaction = writable({'topic':'','msg':''});
-// UPDATE INTERACTION STORE (TOPIC AND MESSAGE) WHEN NEW MESSAGES ARRIVES
-function updateInteraction(topic, msg) {
-    interaction.topic = topic;
-    interaction.msg = msg;
-    // Test
-    console.log('updateIinteraction topic -> ' + interaction.topic)
-    console.log('updateIinteraction msg -> ' + interaction.msg)
-}
+import {broker, conStatus, newMsg, subscribedTopic} from './mqttStore'
 
-// SEND  NEW MESSAGES
-export function sendMsg(topic, msg){
-    let message = new Paho.MQTT.Message(msg);
-    message.destinationName = topic
-    client.send(message);
-  };
+let client;
+let clientId;
 
-// calculate client id
-let clientId = "ws" + Math.random();
-// Create a client instance
-let client = new Paho.MQTT.Client('broker.emqx.io', 8083, clientId);
-
-// set callback handlers
-client.onConnectionLost = onConnectionLost;
-client.onMessageArrived = onMessageArrived;
-
-// connect the client
-client.connect({onSuccess:onConnect});
-
-// called when the client connects
-function onConnect() {
-    // Once a connection has been made, make a subscription and send a message.
-   console.log('Connected to MQTT-WebSocket');
-        // Una vez conectado se subscribe al los topicos
-        client.subscribe('elTopicEDGI');
-        sendMsg("elTopicEDGI","conectado")
-}
-
-// Called when the client loses its connection
-function onConnectionLost(responseObject) {
-    if (responseObject.errorCode !== 0) {
-      console.log("Lost connection: "+responseObject.errorMessage);
-      
+  // Subscribe topic
+  export function subscribeTopic(topic){
+    if (conStatus.status === false || conStatus.status === undefined){
+      console.log('There is no connection');
+    } else if (topic === '') {
+      console.log('There is no topic');
+    } else{
+      subscribedTopic.set({topic});
+      client.subscribe(topic);
     }
   }
 
-// Called when a message arrives
- function onMessageArrived(message) {
-    //console.log(message.destinationName + ": " + message.payloadString );
-    updateInteraction(message.destinationName,message.payloadString);
-    console.log('function onMessageArrived - ' + message.destinationName)
-    console.log('function onMessageArrived - ' + message.payloadString)
-}
+  // Send new message
+  export function sendMsg(topic, msg){
+    if (conStatus.status === false || conStatus.status === undefined){
+        console.log('There is no connection');
+    } else if (topic === '') {
+        console.log('There is no topic');
+    } else if (msg === '') {
+        console.log('There is message');
+    } else {
+        let message = new Paho.MQTT.Message(msg);
+        message.destinationName = topic
+        client.send(message);
+        // newMsg.set({msg});
+    }
+  };
+ 
+  // connect the client
+  export function connectClient(url) {
+    // calculate client id
+    clientId = "xx" + Math.random();
+    // Create a client instance
+    client = new Paho.MQTT.Client(url, 8083, clientId);
+    client.connect({onSuccess:onConnect});
+    broker.set({url})
+  }
 
+    // called when the client connects
+  function onConnect() {
+    // Once a connection has been made
+    conStatus.status = true;    
+    conStatus.set({status});
+    console.log('Connection: ' + conStatus.status);
+    // set callback handlers
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
+  }
+
+  // Called when the client loses its connection
+  function onConnectionLost(responseObject) {
+    if (responseObject.errorCode !== 0) {
+      console.log("Lost connection: " + responseObject.errorMessage);
+    }
+  }
+
+  // Update newMsg Store (Message) when new message arrives
+  function updateMessage(topic, msg) {
+    subscribedTopic.set({topic});
+    newMsg.set({msg});
+  }
+
+  // Called when a message arrives
+  function onMessageArrived(message) {
+    updateMessage(message.destinationName,message.payloadString);
+  }
