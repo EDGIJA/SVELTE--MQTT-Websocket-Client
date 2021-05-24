@@ -23,7 +23,7 @@ let clientId;
     } else if (topic === '') {
         console.log('There is no topic');
     } else if (msg === '') {
-        console.log('There is message');
+        console.log('There is no message');
     } else {
         let message = new Paho.MQTT.Message(msg);
         message.destinationName = topic
