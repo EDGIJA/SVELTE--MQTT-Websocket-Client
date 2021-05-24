@@ -35,7 +35,7 @@ let clientId;
   // connect the client
   export function connectClient(url) {
     // calculate client id
-    clientId = "xx" + Math.random();
+    clientId = "ws" + Math.random();
     // Create a client instance
     client = new Paho.MQTT.Client(url, 8083, clientId);
     client.connect({onSuccess:onConnect});
